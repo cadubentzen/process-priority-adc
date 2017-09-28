@@ -28,19 +28,26 @@ int main(int argc, char **argv)
             printf("DarthVader: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
 
             int fd = 0;
-            char buf[MAX_BUFF] = {0};
-            char ch[5] = {0,0,0,0,0}; // four digits and null terminator \0
+            char buf_ADC4[MAX_BUFF] = {0};
+            snprintf(buf_ADC4, sizeof(buf_ADC4), ADC4);
+            char adc4[5] = {0,0,0,0,0}; // four digits and null terminator \0
+
+            char buf_ADC6[MAX_BUFF] = {0};
+            snprintf(buf_ADC6, sizeof(buf_ADC6), ADC6);
+            char adc6[5] = {0,0,0,0,0}; // four digits and null terminator \0
 
             while(1)
             {
-                snprintf(buf, sizeof(buf), ADC4);
-                printf("%s\n",buf);
-                fd = open(buf, O_RDONLY | O_NONBLOCK);
-                printf("%d\n",fd );
-                read(fd, ch, 4); // reads 4 bytes from file FD to CH
-                printf("%d\n", atoi(ch));
-
+                fd = open(buf_ADC4, O_RDONLY | O_NONBLOCK);
+                read(fd, adc4, 4); // reads 4 bytes from file FD to CH
                 close(fd);
+
+                fd = open(buf_ADC6, O_RDONLY | O_NONBLOCK);
+                read(fd, adc6, 4); // reads 4 bytes from file FD to CH
+                close(fd);
+
+                printf("ADC4: %d\tADC6: %d\n", atoi(adc4), atoi(adc6));
+
                 usleep(500000);
             }
         }
