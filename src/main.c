@@ -17,7 +17,8 @@ int main(int argc, char **argv)
 {
     printf("Priority Control with ADC running...\n");
     pid_t pid1, pid2;
-
+	
+    int i;
     int counter = 0;
     pid1 = fork();
 
@@ -96,6 +97,7 @@ int main(int argc, char **argv)
     { // Child process executes
         child1:
         printf("Son1: Noooooooooo!\n");
+	i = 0;
         while(1)
         {
             printf("Son1: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
@@ -108,12 +110,14 @@ int main(int argc, char **argv)
             {
                 gpio_set_value(GPIO_LED_SON1, 0);
             }
+	    i++;
             usleep(1000000);
         }
         exit(0);
 
         child2:
         printf("Son2: Noooooooooo!\n");
+	i = 0;
         while(1)
         {
             printf("Son2: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
@@ -126,6 +130,7 @@ int main(int argc, char **argv)
             {
                 gpio_set_value(GPIO_LED_SON2, 0);
             }
+	    i++;
             usleep(1000000);
         }
         exit(0);
