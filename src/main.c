@@ -110,8 +110,10 @@ int main(int argc, char **argv)
             {
                 gpio_set_value(GPIO_LED_SON1, 0);
             }
+
 	    i++;
-            usleep(1000000);
+            int j;
+            for(j=0;j<2147483640;j++){}
         }
         exit(0);
 
@@ -130,8 +132,10 @@ int main(int argc, char **argv)
             {
                 gpio_set_value(GPIO_LED_SON2, 0);
             }
+
 	    i++;
-            usleep(1000000);
+            int j;
+            for(j=0;j<2147483640;j++){}
         }
         exit(0);
     }
