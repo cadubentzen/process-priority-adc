@@ -1,116 +1,66 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <poll.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <sys/time.h>
+#include <stdio.h>  // prinf()
+#include <unistd.h> // fork()
+#include <stdlib.h> // exit()
+#include <sys/resource.h> // setpriority(), getpriority()
+#include <time.h> // usleep()
+#include <fcntl.h> // O_RDONLY
 
-#include <gpio.h>
-
-#ifdef LCD_DISPLAY
-    #include <lcd.h>
-#endif
-
-#define GPIO_LED    67
-#define GPIO_BUTTON 68
+#define ADC4 "/sys/bus/iio/devices/iio:device0/in_voltage4_raw"
+#define ADC6 "/sys/bus/iio/devices/iio:device0/in_voltage6_raw"
+#define MAX_BUFF 64
 
 int main(int argc, char **argv)
 {
-    int button_fd;
-    struct pollfd pfd;
-    char buf[MAX_BUF];
-    int rc;
-    int len;
-    struct timeval start, end;
-    int time_mili;
-    int game_on = 0;
-    int button_value;
-#ifdef LCD_DISPLAY
-    int lcd_fd = lcd_open("/dev/lcd0");
+    printf("Priority Control with ADC running...\n");
+    pid_t pid1, pid2;
 
-    lcd_clear_and_home(lcd_fd);
+    int counter = 0;
+    pid1 = fork();
 
-    lcd_message(lcd_fd, "Welcome! #UFRN\n"
-                        "Press button.\n");
-#endif
+    if (pid1 > 0)
+    { // Parent process
+        pid2 = fork();
+        if (pid2 > 0)
+        { // Parent process
+            printf("Luke, I am your father! \n");
 
-    /* Initialize random seed */
-    srand(time(NULL));
+            setpriority(PRIO_PROCESS, 0, 0);
+            printf("DarthVader: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
 
-    /* Setting up LED */
-    gpio_export(GPIO_LED);
-    gpio_set_dir(GPIO_LED, 1);
+            int fd = 0;
+            char buf[MAX_BUFF] = {0};
+            char ch[5] = {0,0,0,0,0}; // four digits and null terminator \0
 
-    /* Setting up button */
-    gpio_export(GPIO_BUTTON);
-    gpio_set_dir(GPIO_BUTTON, 0);
+            while(1)
+            {
+                snprintf(buf, sizeof(buf), ADC4);
+                printf("%s\n",buf);
+                fd = open(buf, O_RDONLY | O_NONBLOCK);
+                printf("%d\n",fd );
+                read(fd, ch, 4); // reads 4 bytes from file FD to CH
+                printf("%d\n", atoi(ch));
 
-    /* Start of program. There are two flows, controlled by game_on.
-       
-       The first flow is wait for user to press and release button to
-       then start the second flow, which is to turn on LED and wait for
-       user to react.
-     */
-    while(1) {
-        /* Turn on LED */
-        gpio_set_value(GPIO_LED, 1);
-
-        /* Start counting time */
-        if (game_on) 
-            gettimeofday(&start, NULL);
-
-        /* Wait for user to press button */
-        do {
-            gpio_get_value(GPIO_BUTTON, &button_value);
-        } while(button_value);
-
-        if (game_on) {
-            /* Get the time user responded */
-            gettimeofday(&end, NULL);
-            time_mili = (end.tv_sec * 1000 + end.tv_usec / 1000)
-                        - (start.tv_sec * 1000 + start.tv_usec / 1000);
-        #ifdef LCD_DISPLAY
-            lcd_clear_and_home(lcd_fd);
-            
-            lcd_message(lcd_fd, 
-                        "Response\n"
-                        "    Time: %.1fs\n"
-                        "Press again.", 
-                        time_mili*0.001);
-        #endif
-            printf("Time elapsed: %.1fs", time_mili*0.001);
+                close(fd);
+                usleep(500000);
+            }
         }
-        
-        printf("\nButton pressed!\n");
-
-        /* Wait for user to release button */
-        do {
-            gpio_get_value(GPIO_BUTTON, &button_value);
-        } while(!button_value);
-
-        /* Turn off LED */
-        gpio_set_value(GPIO_LED, 0);
-
-        if (!game_on) { 
-        #ifdef LCD_DISPLAY
-            lcd_clear_and_home(lcd_fd);
-            lcd_message(lcd_fd, "Wait for it.."); 
-        #endif
-            /* Wait randomly between 0 and 3s to turn on LED */
-            printf("Wait for it..\n");
-            usleep(rand()%3000000);
-            printf("PRESS OR DIE !!!\n");
-        #ifdef LCD_DISPLAY
-            lcd_clear_and_home(lcd_fd);
-            lcd_message(lcd_fd, "PRESS OR DIE !!!");
-        #endif
+        else if (pid2 == 0)
+        { // child process
+            goto child;
         }
+        else
+        { // Process error during creation
 
-        game_on = game_on ? 0 : 1;
+        }
+    }
+    else if (pid1 == 0)
+    { // Child process executes
+        child:
+        printf("Noooooooooo!\n");
+    }
+    else
+    { // Process creation error
+
     }
 
     exit(0);

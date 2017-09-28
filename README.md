@@ -15,7 +15,7 @@ On a Linux system
 #### Share internet connection over the USB ####
 Reference: <https://elementztechblog.wordpress.com/2014/12/22/sharing-internet-using-network-over-usb-in-beaglebone-black/>
 
-On the BeagleBone Board, run (attempt to the correct ip address, it could be either `192.168.6.#` or `192.168.7.#`)
+On the BeagleBone Board, run (mind the correct ip address, it could be either `192.168.6.#` or `192.168.7.#`)
 ```
 ifconfig usb0 192.168.6.2
 route add default gw 192.168.6.1
@@ -75,3 +75,4 @@ Gerar vídeo demonstrando os resultados do trabalho. Alterar valores de priorida
 ## References ##
 1. ADC on BeagleBone. <http://beaglebone.cameon.net/home/reading-the-analog-inputs-adc>
 2. How to read ADC values in kernel 4.x. <https://askubuntu.com/questions/882433/enable-adc-input-on-beaglebone-with-4-x-kernel>
+3. <https://www.teachmemicro.com/beaglebone-black-adc/>
