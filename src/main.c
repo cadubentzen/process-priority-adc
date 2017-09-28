@@ -48,6 +48,28 @@ int main(int argc, char **argv)
 
                 printf("ADC4: %d\tADC6: %d\n", atoi(adc4), atoi(adc6));
 
+                if( atoi(adc4) > 2280) // > 1 volt
+                {
+                    // setar filho1 para 5
+                    setpriority(PRIO_PROCESS, pid1, 5);
+                }
+                else
+                {
+                    // setar filho 1 para 19
+                    setpriority(PRIO_PROCESS, pid1, 19);
+                }
+
+                if( atoi(adc6) > 2280) // > 1 volt
+                {
+                    // setar filho2 para 5
+                    setpriority(PRIO_PROCESS, pid2, 5);
+                }
+                else
+                {
+                    // setar filho2 para 19
+                    setpriority(PRIO_PROCESS, pid2, 19);
+                }
+
                 usleep(500000);
             }
         }
@@ -64,6 +86,11 @@ int main(int argc, char **argv)
     { // Child process executes
         child:
         printf("Noooooooooo!\n");
+        while(1)
+        {
+            printf("DarthVader: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
+            usleep(1000000);
+        }
     }
     else
     { // Process creation error
