@@ -4,10 +4,14 @@
 #include <sys/resource.h> // setpriority(), getpriority()
 #include <time.h> // usleep()
 #include <fcntl.h> // O_RDONLY
+#include <gpio.h> // gpio functions
 
 #define ADC4 "/sys/bus/iio/devices/iio:device0/in_voltage4_raw"
 #define ADC6 "/sys/bus/iio/devices/iio:device0/in_voltage6_raw"
 #define MAX_BUFF 64
+
+#define GPIO_LED_SON1 68
+#define GPIO_LED_SON2 67
 
 int main(int argc, char **argv)
 {
@@ -16,6 +20,12 @@ int main(int argc, char **argv)
 
     int counter = 0;
     pid1 = fork();
+
+    /* Setting up LEDs */
+    gpio_export(GPIO_LED_SON1);
+    gpio_set_dir(GPIO_LED_SON1, 1);
+    gpio_export(GPIO_LED_SON2);
+    gpio_set_dir(GPIO_LED_SON2, 1);
 
     if (pid1 > 0)
     { // Parent process
@@ -39,11 +49,11 @@ int main(int argc, char **argv)
             while(1)
             {
                 fd = open(buf_ADC4, O_RDONLY | O_NONBLOCK);
-                read(fd, adc4, 4); // reads 4 bytes from file FD to CH
+                read(fd, adc4, 4); // reads 4 bytes from file FD to adc4
                 close(fd);
 
                 fd = open(buf_ADC6, O_RDONLY | O_NONBLOCK);
-                read(fd, adc6, 4); // reads 4 bytes from file FD to CH
+                read(fd, adc6, 4); // reads 4 bytes from file FD to adc6
                 close(fd);
 
                 printf("ADC4: %d\tADC6: %d\n", atoi(adc4), atoi(adc6));
@@ -75,7 +85,7 @@ int main(int argc, char **argv)
         }
         else if (pid2 == 0)
         { // child process
-            goto child;
+            goto child2;
         }
         else
         { // Process error during creation
@@ -84,13 +94,41 @@ int main(int argc, char **argv)
     }
     else if (pid1 == 0)
     { // Child process executes
-        child:
-        printf("Noooooooooo!\n");
+        child1:
+        printf("Son1: Noooooooooo!\n");
         while(1)
         {
-            printf("DarthVader: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
+            printf("Son1: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
+
+            if(i%2 == 0)
+            {
+                gpio_set_value(GPIO_LED_SON1, 1);
+            }
+            else
+            {
+                gpio_set_value(GPIO_LED_SON1, 0);
+            }
             usleep(1000000);
         }
+        exit(0);
+
+        child2:
+        printf("Son2: Noooooooooo!\n");
+        while(1)
+        {
+            printf("Son2: my priority is %d\n", getpriority(PRIO_PROCESS, 0 ));
+
+            if(i%2 == 0)
+            {
+                gpio_set_value(GPIO_LED_SON2, 1);
+            }
+            else
+            {
+                gpio_set_value(GPIO_LED_SON2, 0);
+            }
+            usleep(1000000);
+        }
+        exit(0);
     }
     else
     { // Process creation error

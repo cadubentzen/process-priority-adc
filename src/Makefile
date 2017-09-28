@@ -2,7 +2,7 @@ CC = gcc
 override CFLAGS += -I../include
 
 SOURCES = main.c \
-
+		  gpio.c
 
 OBJ = $(SOURCES:c=o)
 
