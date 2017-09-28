@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
 	    i++;
             int j;
-            for(j=0;j<2147483640;j++){}
+            for(j=0;j<114748364;j++){}
         }
         exit(0);
 
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
 	    i++;
             int j;
-            for(j=0;j<2147483640;j++){}
+            for(j=0;j<114748364;j++){}
         }
         exit(0);
     }
